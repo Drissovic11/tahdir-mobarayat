@@ -6,7 +6,12 @@
 
 /* Surfaces et rythme plus compacts, en conservant des cibles tactiles de 44px. */
 body{background:#edf4fb}
-header{border-bottom-color:#d5e3f2;box-shadow:0 2px 12px #0c307006}
+header{background:var(--navy);color:#fff;border-bottom-color:#244d87;box-shadow:0 2px 12px #0c307018}
+header .icon-button{color:#fff}
+header .header-note{color:#d1e2fa}
+header nav a:hover,header nav a:focus-visible{background:#244d87;color:#fff}
+header .brand-mark i{background:#8ab9ff}
+header .brand-mark i:first-child,header .brand-mark i:last-child{background:var(--yellow)}
 .header-inner{min-height:76px}
 .hero{margin-block:14px 24px}
 .organizations{gap:18px;margin-bottom:26px}
