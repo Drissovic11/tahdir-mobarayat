@@ -8,6 +8,7 @@ Route::get('/organizations', function () {
         ->orderBy('name')->get()->map(fn ($organization) => [
             'id' => $organization->slug, 'name' => $organization->name,
             'logo' => $organization->logo, 'aliases' => $organization->aliases ?? '',
+            'logo_url' => $organization->logo_path ? \Illuminate\Support\Facades\Storage::disk('logos')->url($organization->logo_path) : null,
             'specialties' => $organization->specialties->map(fn ($specialty) => [
                 'id' => $specialty->slug, 'database_id' => $specialty->id, 'name' => $specialty->name,
             ]),

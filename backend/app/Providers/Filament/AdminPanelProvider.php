@@ -20,6 +20,7 @@ class AdminPanelProvider extends PanelProvider {
             ->brandName('التحضير لمباريات التوظيف')->colors(['primary' => Color::hex('#0c3070')])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->pages([Dashboard::class])
+            ->widgets([\App\Filament\Widgets\CatalogStats::class])
             ->middleware([EncryptCookies::class, AddQueuedCookiesToResponse::class, StartSession::class,
                 AuthenticateSession::class, ShareErrorsFromSession::class, VerifyCsrfToken::class,
                 SubstituteBindings::class, DisableBladeIconComponents::class, DispatchServingFilamentEvent::class])
