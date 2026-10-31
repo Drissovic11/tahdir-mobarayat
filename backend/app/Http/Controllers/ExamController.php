@@ -9,6 +9,22 @@ use Illuminate\Validation\ValidationException;
 
 class ExamController extends Controller
 {
+ public function practice(\App\Models\Specialty $specialty) {
+  abort_unless($specialty->is_active && $specialty->organization->is_active,404);
+  return $specialty->questions()->where('is_active',true)->orderBy('id')->limit(20)
+   ->get(['id','prompt','options','correct_option','explanation']);
+ }
+ public function answer(Request $request,string $attempt) {
+  $v=$request->validate(['question_id'=>['required','integer'],'option'=>['required','integer','between:0,3']]);
+  return DB::transaction(function() use($request,$attempt,$v) {
+   $record=Attempt::whereKey($attempt)->lockForUpdate()->firstOrFail();
+   abort_unless(hash_equals($record->token_hash,hash('sha256',(string)$request->header('X-Attempt-Token'))),403);
+   abort_if($record->submitted_at || now()->greaterThan($record->expires_at),409);
+   abort_unless(in_array($v['question_id'],array_column($record->snapshot,'id'),true),422);
+   $answers=$record->answers??[]; $answers[$v['question_id']]=$v['option'];
+   $record->answers=$answers; $record->save(); return ['saved'=>true];
+  });
+ }
  public function index(Request $request) {
   $v=$request->validate(['specialty_id'=>['required','integer','exists:specialties,id']]);
   return Exam::where('specialty_id',$v['specialty_id'])->where('is_published',true)
@@ -35,7 +51,7 @@ class ExamController extends Controller
     $answers=$v['answers']; $ids=array_column($record->snapshot,'id');
     foreach(array_keys($answers) as $id) if(!in_array((int)$id,$ids,true)) throw ValidationException::withMessages(['answers'=>'Question étrangère à cet examen.']);
     // Aucune réponse tardive acceptée par le serveur.
-    if(now()->greaterThan($record->expires_at)) $answers=[];
+    if(now()->greaterThan($record->expires_at)) $answers=$record->answers??[];
     $record->answers=$answers;
     $record->score=collect($record->snapshot)->filter(fn($q)=>isset($answers[$q['id']]) && (int)$answers[$q['id']]===$q['correct_option'])->count();
     $record->submitted_at=now(); $record->save();

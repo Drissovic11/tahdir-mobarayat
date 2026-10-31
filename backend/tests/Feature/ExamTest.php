@@ -29,6 +29,13 @@ class ExamTest extends TestCase
   $this->travel(6)->minutes();
   $this->withHeader('X-Attempt-Token',$d['token'])->postJson('/api/attempts/'.$d['id'].'/submit',['answers'=>[$q->id=>3]])->assertOk()->assertJsonPath('score',0);
  }
+ public function test_saved_answers_are_preserved_when_the_timer_expires(): void {
+  [$e,$q]=$this->exam(); $d=$this->postJson('/api/exams/'.$e->id.'/attempts')->json();
+  $this->withHeader('X-Attempt-Token',$d['token'])->postJson('/api/attempts/'.$d['id'].'/answers',['question_id'=>$q->id,'option'=>3])->assertOk();
+  $this->travel(6)->minutes();
+  $this->withHeader('X-Attempt-Token',$d['token'])->postJson('/api/attempts/'.$d['id'].'/answers',['question_id'=>$q->id,'option'=>0])->assertStatus(409);
+  $this->withHeader('X-Attempt-Token',$d['token'])->postJson('/api/attempts/'.$d['id'].'/submit',['answers'=>[]])->assertOk()->assertJsonPath('score',1);
+ }
  public function test_unpublished_and_cross_specialty_exams_cannot_be_started(): void {
   [$e,$q]=$this->exam(); $e->update(['is_published'=>false]);
   $this->postJson('/api/exams/'.$e->id.'/attempts')->assertNotFound();

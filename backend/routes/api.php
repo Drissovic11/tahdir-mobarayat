@@ -15,5 +15,7 @@ Route::get('/organizations', function () {
         ]);
 })->middleware('throttle:60,1');
 Route::get('/exams',[ExamController::class,'index'])->middleware('throttle:60,1');
+Route::get('/specialties/{specialty}/practice',[ExamController::class,'practice'])->middleware('throttle:60,1');
 Route::post('/exams/{exam}/attempts',[ExamController::class,'start'])->middleware('throttle:10,1');
 Route::post('/attempts/{attempt}/submit',[ExamController::class,'submit'])->middleware('throttle:30,1');
+Route::post('/attempts/{attempt}/answers',[ExamController::class,'answer'])->middleware('throttle:120,1');

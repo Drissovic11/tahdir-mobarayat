@@ -40,6 +40,22 @@ jobs:
       - run: php artisan migrate --force && php artisan db:seed --force
       - run: php artisan test
       - run: php artisan filament:assets
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci && npm run build
+        working-directory: frontend
+        env:
+          VITE_CATALOG_API: /api/organizations
+          VITE_CONTENT_API: /api
+      - run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+      - run: node scripts/package-infinityfree.mjs release/infinityfree
+        working-directory: .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: infinityfree-installation
+          path: release/infinityfree
+          include-hidden-files: true
       - uses: actions/upload-artifact@v4
         with:
           name: backend-composer-lock

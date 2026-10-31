@@ -7,5 +7,7 @@ Route::get('/installation',[InstallationController::class,'show'])->middleware('
 Route::post('/installation',[InstallationController::class,'store'])->middleware('throttle:5,1');
 
 Route::get('/', function () {
-    return view('welcome');
+    return file_exists(public_path('frontend.html'))
+        ? response()->file(public_path('frontend.html'))
+        : view('welcome');
 });
